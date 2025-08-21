@@ -1,0 +1,93 @@
+%import common.ESCAPED_STRING
+%import common.SIGNED_NUMBER
+%import common.NEWLINE
+
+?script: stmt*
+
+?stmt: add_stmt 
+     | connect_stmt 
+     | append_stmt 
+     | validate_stmt 
+     | emit_stmt 
+     | COMMENT
+     | NEWLINE
+
+// ---------- key/values (forward-compatible extras) ----------
+// ---------- Key-value params ----------
+extra_params: (COMMA SP kv_pair)+
+kv_pair: ID "=" value
+key: ID
+?value: STRING | NUM | ID | BOOL | list_id | list_num | composite_value
+
+// Support for composite values like {R1_ohm_per_km=0.05, X1_ohm_per_km=0.4}
+composite_value: LBRACE SP? (kv_pair (COMMA SP kv_pair)*)? SP? RBRACE
+
+// ---------- ADD_* ----------
+add_stmt: "ADD_" add_kind
+add_kind: add_bus | add_bay | add_coupler | add_breaker | add_disconnector
+        | add_transformer | add_line
+
+add_bus: "BUS" SP bus_params extra_params?
+bus_params: "id=" ID "," SP "kv=" NUM
+
+add_bay: "BAY" SP bay_params extra_params?
+bay_params: "id=" ID "," SP "kind=" BAYKIND "," SP "kv=" NUM "," SP "bus=" ID
+
+add_coupler: "COUPLER" SP coupler_params extra_params?
+coupler_params: "id=" ID "," SP "kv=" NUM "," SP "from_bus=" ID "," SP "to_bus=" ID
+
+add_breaker: "BREAKER" SP breaker_params extra_params?
+breaker_params: "id=" ID "," SP "kv=" NUM "," SP "interrupting_kA=" NUM "," SP "type=" BREAKER_TYPE "," SP "continuous_A=" NUM
+
+add_disconnector: "DISCONNECTOR" SP disconnector_params extra_params?
+disconnector_params: "id=" ID "," SP "kv=" NUM "," SP "type=" DISCONNECTOR_TYPE "," SP "continuous_A=" NUM
+
+add_transformer: "TRANSFORMER" SP transformer_params extra_params?
+transformer_params: "id=" ID "," SP "type=" TRANSFORMER_TYPE "," SP "rated_MVA=" NUM "," SP "vector_group=" STRING "," SP "percentZ=" NUM
+
+add_line: "LINE" SP line_params extra_params?
+line_params: "id=" ID "," SP "kv=" NUM "," SP "type=" LINE_TYPE "," SP "length_km=" NUM "," SP "thermal_A=" NUM
+
+// ---------- Topology & assignment ----------
+connect_stmt: "CONNECT" SP "series=" LSQB series_item (COMMA SP series_item)* RSQB extra_params?
+series_item: ID | OPEN_END | stub_obj
+OPEN_END: "OPEN_END"
+stub_obj: "STUB" "(" STRING ")"
+
+append_stmt: "APPEND_TO_BAY" SP "bay_id=" ID "," SP "object_id=" ID extra_params?
+
+// ---------- Validation / emission ----------
+validate_stmt: "VALIDATE" extra_params?
+emit_stmt: "EMIT_SPEC" extra_params?
+
+// ---------- Enums ----------
+BAYKIND: "LINE"|"TRANSFORMER"|"FEEDER"|"SHUNT"|"COUPLER"|"GENERATOR"
+BREAKER_TYPE: "SF6"|"VACUUM"|"OIL"|"AIRBLAST"
+DISCONNECTOR_TYPE: "CENTER_BREAK"|"DOUBLE_BREAK"|"PANTOGRAPH"|"EARTH_SWITCH_COMBINED"
+TRANSFORMER_TYPE: "TWO_WINDING"|"AUTO"|"THREE_WINDING"|"GROUNDING"
+LINE_TYPE: "OHL"|"UGC"
+
+// ---------- Lists & atoms ----------  
+list_value: LSQB list_content? RSQB
+list_content: list_item (COMMA SP list_item)*
+list_item: ID | NUM
+
+// For backwards compatibility
+list_id.2: list_value   // Higher priority for ID lists
+list_num.1: list_value  // Lower priority for NUM lists
+
+BOOL: "true"|"false"
+ID: /[a-z][a-z0-9_-]*/
+STRING: ESCAPED_STRING
+NUM: SIGNED_NUMBER
+SEMICOLON: ";"
+COMMA: ","
+LSQB: "["
+RSQB: "]"
+LBRACE: "{"
+RBRACE: "}"
+SP: /[ \t]+/
+COMMENT: /#[^\r\n]*/
+
+%ignore /[ \f]*\r?\n[ \t]*/
+%ignore /[ \t]+(?=\r?\n)/
