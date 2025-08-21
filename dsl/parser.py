@@ -136,10 +136,14 @@ class ToIR(Transformer):
     def tap_obj(self, meta, *items):
         # items: side, range_pct, steps, maybe regulation_mode
         d = {}
-        if len(items) >= 1: d["side"] = items[0]
-        if len(items) >= 2: d["range_pct"] = items[1]
-        if len(items) >= 3: d["steps"] = items[2]
-        if len(items) >= 4: d["regulation_mode"] = items[3]
+        if len(items) >= 1:
+            d["side"] = items[0]
+        if len(items) >= 2:
+            d["range_pct"] = items[1]
+        if len(items) >= 3:
+            d["steps"] = items[2]
+        if len(items) >= 4:
+            d["regulation_mode"] = items[3]
         return d
 
     def tuning(self, meta, tuned_hz, q_factor):
@@ -537,7 +541,8 @@ class ToIR(Transformer):
         kvs = {"id": c[0], "kv": c[1], "ratio": c[2], "class": c[3]}
         idx = 4
         if idx < len(c) and not isinstance(c[idx], dict):
-            kvs["burden_VA"] = c[idx]; idx += 1
+            kvs["burden_VA"] = c[idx]
+            idx += 1
         extra = c[idx] if idx < len(c) and isinstance(c[idx], dict) else None
         kvs = _merge_front(kvs, extra)
         return ("OBJ", "CT", kvs, (meta.line, meta.column))
@@ -554,7 +559,8 @@ class ToIR(Transformer):
         kvs = {"id": c[0], "functions": c[1], "dc_supply": c[2]}
         idx = 3
         if idx < len(c) and not isinstance(c[idx], dict):
-            kvs["trip_objects"] = c[idx]; idx += 1
+            kvs["trip_objects"] = c[idx]
+            idx += 1
         extra = c[idx] if idx < len(c) and isinstance(c[idx], dict) else None
         kvs = _merge_front(kvs, extra)
         return ("OBJ", "RELAY_GROUP", kvs, (meta.line, meta.column))
@@ -610,7 +616,8 @@ class ToIR(Transformer):
         kvs = {"id": c[0], "kv": c[1], "length_km": c[2], "thermal_A": c[3], "insulation": c[4]}
         idx = 5
         if idx < len(c) and isinstance(c[idx], dict):
-            kvs["seq_params"] = c[idx]; idx += 1
+            kvs["seq_params"] = c[idx]
+            idx += 1
         extra = c[idx] if idx < len(c) and isinstance(c[idx], dict) else None
         kvs = _merge_front(kvs, extra)
         return ("OBJ", "CABLE", kvs, (meta.line, meta.column))
@@ -620,7 +627,8 @@ class ToIR(Transformer):
         kvs = {"id": c[0], "kv": c[1], "mvar_total": c[2], "steps": c[3], "connection": c[4]}
         idx = 5
         if idx < len(c) and isinstance(c[idx], dict) and "tuned_Hz" in c[idx]:
-            kvs["tuning"] = c[idx]; idx += 1
+            kvs["tuning"] = c[idx]
+            idx += 1
         extra = c[idx] if idx < len(c) and isinstance(c[idx], dict) else None
         kvs = _merge_front(kvs, extra)
         return ("OBJ", "SHUNT_CAP_BANK", kvs, (meta.line, meta.column))
@@ -644,7 +652,8 @@ class ToIR(Transformer):
         kvs = {"id": c[0], "kv": c[1], "mvar_range": c[2], "control_mode": c[3]}
         idx = 4
         if idx < len(c) and not isinstance(c[idx], dict):
-            kvs["response_ms"] = c[idx]; idx += 1
+            kvs["response_ms"] = c[idx]
+            idx += 1
         extra = c[idx] if idx < len(c) and isinstance(c[idx], dict) else None
         kvs = _merge_front(kvs, extra)
         return ("OBJ", "SVC", kvs, (meta.line, meta.column))
@@ -654,7 +663,8 @@ class ToIR(Transformer):
         kvs = {"id": c[0], "kv": c[1], "mvar_range": c[2], "control_mode": c[3]}
         idx = 4
         if idx < len(c) and not isinstance(c[idx], dict):
-            kvs["response_ms"] = c[idx]; idx += 1
+            kvs["response_ms"] = c[idx]
+            idx += 1
         extra = c[idx] if idx < len(c) and isinstance(c[idx], dict) else None
         kvs = _merge_front(kvs, extra)
         return ("OBJ", "STATCOM", kvs, (meta.line, meta.column))
@@ -748,7 +758,8 @@ class ToIR(Transformer):
         kvs = {"id": c[0], "title": c[1], "voltage_scope": c[2], "buses": c[3], "bays": c[4]}
         idx = 5
         if idx < len(c) and isinstance(c[idx], dict) and ("pref" in c[idx] or "bus_spacing" in c[idx]):
-            kvs["routing"] = c[idx]; idx += 1
+            kvs["routing"] = c[idx]
+            idx += 1
         extra = c[idx] if idx < len(c) and isinstance(c[idx], dict) else None
         if extra:
             kvs.update(extra)

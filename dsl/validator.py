@@ -1,5 +1,4 @@
 from .ir_types import IR
-from typing import List, Dict, Any
 
 class DSLValidationError(Exception):
     def __init__(self, code: str, msg: str):
@@ -8,7 +7,8 @@ class DSLValidationError(Exception):
 
 def _kv_of(ir: IR, obj_id: str) -> float | None:
     o = ir.objects.get(obj_id)
-    if not o: return None
+    if not o:
+        return None
     # keys differ by type; for buses use attrs['kv']; for devices use attrs['kv']
     return o.attrs.get("kv")
 
